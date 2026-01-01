@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
 import MenuHeader from '@/components/MenuHeader';
 import CategoryTabs from '@/components/CategoryTabs';
 import ProductGrid from '@/components/ProductGrid';
@@ -25,7 +24,6 @@ interface MenuPageClientProps {
 }
 
 export default function MenuPageClient({ params }: MenuPageClientProps) {
-    const t = useTranslations('Menu');
     const [menuData, setMenuData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);

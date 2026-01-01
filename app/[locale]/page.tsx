@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
 import { QrCode, ArrowRight, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -11,7 +10,6 @@ interface HomePageProps {
 }
 
 export default function HomePage({ params }: HomePageProps) {
-  const t = useTranslations('Menu');
   const router = useRouter();
   const [restaurantSlug, setRestaurantSlug] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -64,8 +62,8 @@ export default function HomePage({ params }: HomePageProps) {
             RestQR
           </h1>
           <p className="text-gray-600 dark:text-gray-300">
-            {params.locale === 'tr' 
-              ? 'Modern QR Menü Sistemi' 
+            {params.locale === 'tr'
+              ? 'Modern QR Menü Sistemi'
               : 'Modern QR Menu System'}
           </p>
         </div>
@@ -78,9 +76,9 @@ export default function HomePage({ params }: HomePageProps) {
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6"
         >
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 text-center">
-            {t('scanQr')}
+            {params.locale === 'tr' ? 'QR Kodu Tarayın' : 'Scan QR Code'}
           </h2>
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -95,10 +93,10 @@ export default function HomePage({ params }: HomePageProps) {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t('table')}
+                {params.locale === 'tr' ? 'Masa No' : 'Table Number'}
               </label>
               <input
                 type="number"
@@ -108,7 +106,7 @@ export default function HomePage({ params }: HomePageProps) {
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-restqr-emerald-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               />
             </div>
-            
+
             <motion.button
               type="submit"
               disabled={isLoading}
@@ -120,7 +118,7 @@ export default function HomePage({ params }: HomePageProps) {
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 <>
-                  <span>{t('viewMenu')}</span>
+                  <span>{params.locale === 'tr' ? 'Menüyü Görüntüle' : 'View Menu'}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
