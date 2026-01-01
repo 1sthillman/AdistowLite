@@ -16,6 +16,7 @@ const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'export',
   reactStrictMode: false, // Disable strict mode to prevent double rendering errors
   images: {
     domains: ['localhost', 'restqr-storage.s3.amazonaws.com'],
