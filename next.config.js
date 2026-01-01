@@ -10,9 +10,13 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   },
 });
 
+const isProd = process.env.NODE_ENV === 'production';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
+  // GitHub Pages repo adı path'i için gereklidir
+  basePath: isProd ? '/AdistowLite' : '',
   trailingSlash: true,
   reactStrictMode: false,
   images: {
