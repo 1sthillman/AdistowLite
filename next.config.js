@@ -10,15 +10,11 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   },
 });
 
-const createNextIntlPlugin = require('next-intl/plugin');
-
-const withNextIntl = createNextIntlPlugin();
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'export',
   trailingSlash: true,
-  reactStrictMode: false, // Disable strict mode to prevent double rendering errors
+  reactStrictMode: false,
   images: {
     domains: ['localhost', 'restqr-storage.s3.amazonaws.com'],
     unoptimized: true
@@ -32,4 +28,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withPWA(withNextIntl(nextConfig));
+module.exports = withPWA(nextConfig);

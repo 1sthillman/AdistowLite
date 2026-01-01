@@ -1,5 +1,4 @@
 import "../globals.css";
-import { NextIntlClientProvider, useMessages } from 'next-intl';
 import { Toaster } from 'react-hot-toast';
 import { Viewport } from 'next';
 import BackgroundBokeh from '@/components/BackgroundBokeh';
@@ -46,8 +45,6 @@ export default function LocaleLayout({
   children: React.ReactNode;
   params: { locale: string };
 }) {
-  const messages = useMessages();
-
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} ${jetbrains.variable} font-sans antialiased text-[#FAF7F2] min-h-screen selection:bg-[#D97706]/30 selection:text-white overflow-x-hidden`}>
@@ -55,32 +52,30 @@ export default function LocaleLayout({
         {/* Animated Bokeh & Glass Background */}
         <BackgroundBokeh />
 
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <CartProvider>
-            <main className="relative z-10 min-h-screen flex flex-col">
-              {children}
-            </main>
+        <CartProvider>
+          <main className="relative z-10 min-h-screen flex flex-col">
+            {children}
+          </main>
 
-            <Toaster
-              position="top-center"
-              toastOptions={{
-                className: 'font-sans font-medium',
-                style: {
-                  background: '#1A1A1A',
-                  color: '#FAF7F2',
-                  border: '1px solid rgba(250, 247, 242, 0.1)',
-                  backdropFilter: 'blur(10px)',
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              className: 'font-sans font-medium',
+              style: {
+                background: '#1A1A1A',
+                color: '#FAF7F2',
+                border: '1px solid rgba(250, 247, 242, 0.1)',
+                backdropFilter: 'blur(10px)',
+              },
+              success: {
+                iconTheme: {
+                  primary: '#D97706',
+                  secondary: '#FAF7F2',
                 },
-                success: {
-                  iconTheme: {
-                    primary: '#D97706',
-                    secondary: '#FAF7F2',
-                  },
-                },
-              }}
-            />
-          </CartProvider>
-        </NextIntlClientProvider>
+              },
+            }}
+          />
+        </CartProvider>
       </body>
     </html>
   );
