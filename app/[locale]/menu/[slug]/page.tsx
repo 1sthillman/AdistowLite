@@ -181,6 +181,7 @@ export default function MenuPage() {
       <ServiceButtons
         restaurantId={params.slug as string}
         tableId={params.table as string || '1'}
+        tableName={menuData.restaurant.tables?.find((t: any) => t.id.toString() === (params.table || '1'))?.name || `Masa ${params.table || '1'}`}
         location={menuData.restaurant.coordinates}
         waiterCallEnabled={menuData.settings?.waiterCallEnabled}
         coalRequestEnabled={menuData.settings?.coalRequestEnabled}

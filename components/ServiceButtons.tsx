@@ -14,6 +14,7 @@ import { triggerNotification, NotificationType } from '@/lib/notifications';
 interface ServiceButtonsProps {
     restaurantId: string;
     tableId: string;
+    tableName?: string;
     location?: { latitude: number; longitude: number };
     waiterCallEnabled?: boolean;
     coalRequestEnabled?: boolean;
@@ -22,6 +23,7 @@ interface ServiceButtonsProps {
 export default function ServiceButtons({
     restaurantId,
     tableId,
+    tableName,
     location,
     waiterCallEnabled = true,
     coalRequestEnabled = false
