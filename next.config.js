@@ -22,23 +22,12 @@ const nextConfig = {
     domains: ['localhost', 'restqr-storage.s3.amazonaws.com'],
     unoptimized: true
   },
-  experimental: {
-    appDir: true,
-  },
   devIndicators: {
     buildActivity: false,
     buildActivityPosition: 'bottom-right',
   },
   env: {
     CUSTOM_KEY: 'restqr-customer',
-  },
-  async rewrites() {
-    return [
-      {
-        source: '/api/backend/:path*',
-        destination: 'http://localhost:3000/api/v1/:path*'
-      }
-    ];
   },
 };
 
