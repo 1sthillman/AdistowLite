@@ -18,7 +18,7 @@ export default function HomePage({ params }: HomePageProps) {
     e.preventDefault();
     if (restaurantSlug.trim()) {
       setIsLoading(true);
-      router.push(`/${params.locale}/menu/${restaurantSlug}`);
+      router.push(`/${params.locale}/menu?slug=${restaurantSlug}`);
     }
   };
 
