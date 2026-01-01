@@ -1,4 +1,3 @@
-import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google";
 import "../globals.css";
 import { NextIntlClientProvider, useMessages } from 'next-intl';
 import { Toaster } from 'react-hot-toast';
@@ -6,9 +5,10 @@ import { Viewport } from 'next';
 import BackgroundBokeh from '@/components/BackgroundBokeh';
 import { CartProvider } from '@/context/CartContext';
 
-const inter = Inter({ subsets: ["latin"], variable: '--font-inter' });
-const playfair = Playfair_Display({ subsets: ["latin"], variable: '--font-playfair' });
-const jetbrains = JetBrains_Mono({ subsets: ["latin"], variable: '--font-mono' });
+// Standard font stacks to avoid build-time fetch errors in CI
+const inter = { variable: '--font-inter' };
+const playfair = { variable: '--font-playfair' };
+const jetbrains = { variable: '--font-mono' };
 
 export function generateStaticParams() {
   return [{ locale: 'tr' }, { locale: 'en' }];

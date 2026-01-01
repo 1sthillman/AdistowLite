@@ -1,9 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Playfair+Display:wght@700;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
+    /* Font Variables for manual mapping */
+    --font-inter: 'Inter', sans-serif;
+    --font-playfair: 'Playfair Display', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
     /* Luxury Palette */
     --color-black: #1A1A1A;
     --color-cream: #FAF7F2;

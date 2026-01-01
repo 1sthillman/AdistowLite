@@ -1,7 +1,5 @@
 import './globals.css';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({ subsets: ['latin'] });
+const inter = { className: 'font-sans' };
 
 export const metadata = {
   title: 'RestQR - QR Menu Platform',
