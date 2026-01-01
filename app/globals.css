@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Luxury Palette */
+    --color-black: #1A1A1A;
+    --color-cream: #FAF7F2;
+    --color-emerald: #065F46;
+    --color-gold: #D97706;
+  }
+
+  body {
+    @apply antialiased font-sans;
+    color: #FAF7F2;
+    background: transparent;
+  }
+
+  /* Smooth Scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Custom Selection */
+  ::selection {
+    background-color: rgba(217, 119, 6, 0.3);
+    /* luxury-gold/30 */
+    color: white;
+  }
+}
+
+@layer components {
+
+  /* Premium Glass Card */
+  .glass-card {
+    @apply bg-white/5 backdrop-blur-xl border border-white/5 rounded-2xl shadow-xl transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply bg-white/10 border-white/10 transform -translate-y-1;
+  }
+
+  /* Luxury Button */
+  .btn-gold {
+    @apply bg-gradient-to-r from-[#D97706] to-amber-500 text-white font-medium px-6 py-3 rounded-xl shadow-lg shadow-amber-900/20 active:scale-95 transition-all hover:brightness-110;
+  }
+
+  /* Typography */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply tracking-tight text-white;
+    font-family: var(--font-playfair), serif;
+  }
+}
+
+@layer utilities {
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .mask-linear-fade {
+    mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

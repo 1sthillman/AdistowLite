@@ -1,0 +1,128 @@
+{
+  "Navigation": {
+    "menu": "Menu",
+    "categories": "Categories",
+    "customize": "Customize"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "remove": "Remove",
+    "price": "Price",
+    "total": "Total",
+    "table": "Table",
+    "language": "Language"
+  },
+  "Menu": {
+    "scanQr": "Scan QR Code",
+    "restaurantNotFound": "Restaurant not found",
+    "menuNotAvailable": "Menu is not available right now",
+    "viewMenu": "View Menu",
+    "appetizers": "Appetizers",
+    "mainCourses": "Main Courses",
+    "desserts": "Desserts",
+    "beverages": "Beverages",
+    "table": "Table"
+  },
+  "Product": {
+    "customize": "Customize",
+    "ingredients": "Ingredients",
+    "removeIngredient": "Remove",
+    "addExtras": "Extras",
+    "specialNotes": "Special Notes",
+    "specialNotesPlaceholder": "E.g. Please cut into 4 pieces, Less spicy, etc.",
+    "characterCount": "{count}/500 characters",
+    "addToOrder": "Add to Order",
+    "options": "{count} Options",
+    "allergenWarning": "Allergen warning: Contains {allergens}",
+    "mandatory": "Mandatory",
+    "total": "Total"
+  },
+  "Customization": {
+    "removeIngredients": "Remove Ingredients",
+    "addExtras": "Add Extras",
+    "priceUpdate": "Price updated",
+    "mandatory": "Mandatory ingredient (cannot be removed)",
+    "outOfStock": "Out of stock"
+  },
+  "Cart": {
+    "title": "My Cart",
+    "empty": "Your cart is empty",
+    "checkout": "Place Order",
+    "note": "Order Note",
+    "notePlaceholder": "Any special requests for the kitchen?",
+    "locationError": "Location Error",
+    "locationErrorDesc": "You must be at the restaurant to order.",
+    "permissionDenied": "Location permission denied",
+    "items": "Items",
+    "total": "Total Amount",
+    "orderSent": "Order received! Kitchen is preparing.",
+    "orderError": "Order failed. Please try again."
+  },
+  "Service": {
+    "waiter": "Call Waiter",
+    "coal": "Request Coal",
+    "bill": "Request Bill",
+    "waiterSent": "Waiter has been notified",
+    "coalSent": "Coal request sent",
+    "billSent": "Bill request sent",
+    "cooldown": "Please wait {seconds} seconds",
+    "locationError": "You cannot use this feature without location permission."
+  },
+  "Rating": {
+    "title": "Rate Your Experience",
+    "placeholder": "Share your thoughts...",
+    "submit": "Submit Review",
+    "success": "Thanks! Your rating has been saved.",
+    "error": "Failed to submit rating",
+    "alreadyRated": "You have already rated this order."
+  },
+  "Permission": {
+    "browserUnsupported": "Your browser does not support location services.",
+    "permissionGranted": "Location permission granted! ✅",
+    "permissionDeniedToast": "Location permission denied.",
+    "locationServicesOff": "Location services are off. Please enable GPS.",
+    "locationFetchError": "Could not get location. Try again.",
+    "errorGeneric": "An error occurred. Please try again.",
+    "locationDisabledTitle": "Location Services Disabled",
+    "locationDisabledDesc": "Please enable GPS/Location settings on your device.",
+    "tooFarTitle": "You are not at the restaurant",
+    "tooFarDesc": "You are {distance}m away. You must be at the restaurant (max 50m).",
+    "tooFarDescSimple": "You must be at the restaurant to order.",
+    "permissionDeniedTitle": "Permission Denied",
+    "permissionDeniedDesc": "Your browser blocked location access. Please allow manually.",
+    "verifyTitle": "Location Verification",
+    "verifyDesc": "We need access to your location to allow ordering.",
+    "allow": "Allow Access",
+    "cancel": "Close",
+    "close": "Close",
+    "understand": "I Understand",
+    "checkAgain": "Check Again",
+    "howToAllow": "How to Allow?",
+    "ok": "OK",
+    "checking": "Checking...",
+    "safeOrder": "Order safely",
+    "callWaiter": "Call waiter",
+    "requestBill": "Request bill",
+    "safetyWarning": "Security: You can only order at the restaurant",
+    "privacyNote": "Your location is used for verification only and is never stored.",
+    "instructions": {
+      "chromeTitle": "Chrome/Edge",
+      "chromeStep1": "Click the 🔒 lock icon in address bar",
+      "chromeStep2": "Find 'Location' settings",
+      "chromeStep3": "Select 'Allow'",
+      "chromeStep4": "Refresh the page",
+      "mobileTitle": "Mobile (Safari/Chrome)",
+      "mobileStep1": "Settings -> Safari/Chrome",
+      "mobileStep2": "Location -> Allow while using app",
+      "mobileStep3": "Refresh the page",
+      "refreshNote": "Don't forget to refresh the page!"
+    }
+  },
+  "Footer": {
+    "poweredBy": "Powered by RestQR"
+  }
+}

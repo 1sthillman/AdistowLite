@@ -1,0 +1,128 @@
+{
+  "Navigation": {
+    "menu": "Menü",
+    "categories": "Kategoriler",
+    "customize": "Özelleştir"
+  },
+  "Common": {
+    "loading": "Yükleniyor...",
+    "error": "Bir hata oluştu",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "add": "Ekle",
+    "remove": "Kaldır",
+    "price": "Fiyat",
+    "total": "Toplam",
+    "table": "Masa",
+    "language": "Dil"
+  },
+  "Menu": {
+    "scanQr": "QR Kodu Tara",
+    "restaurantNotFound": "Restoran bulunamadı",
+    "menuNotAvailable": "Menü şu anda mevcut değil",
+    "viewMenu": "Menüyü Görüntüle",
+    "appetizers": "Aperatifler",
+    "mainCourses": "Ana Yemekler",
+    "desserts": "Tatlılar",
+    "beverages": "İçecekler",
+    "table": "Masa"
+  },
+  "Product": {
+    "customize": "Özelleştir",
+    "ingredients": "İçerikler",
+    "removeIngredient": "Çıkar",
+    "addExtras": "Ekstralar",
+    "specialNotes": "Özel Notlar",
+    "specialNotesPlaceholder": "Örn: Lütfen 4 parça kesin, Daha az baharatlı, vb.",
+    "characterCount": "{count}/500 karakter",
+    "addToOrder": "Siparişe Ekle",
+    "options": "{count} Seçenek",
+    "allergenWarning": "Alerjen uyarısı: {allergens} içerir",
+    "mandatory": "Zorunlu",
+    "total": "Toplam"
+  },
+  "Customization": {
+    "removeIngredients": "İçerik Çıkar",
+    "addExtras": "Ekstra Ekle",
+    "priceUpdate": "Fiyat güncellendi",
+    "mandatory": "Zorunlu içerik (çıkarılamaz)",
+    "outOfStock": "Stokta yok"
+  },
+  "Cart": {
+    "title": "Sepetim",
+    "empty": "Sepetiniz boş",
+    "checkout": "Siparişi Onayla",
+    "note": "Sipariş Notu",
+    "notePlaceholder": "Mutfağa özel bir isteğiniz var mı?",
+    "locationError": "Konum Hatası",
+    "locationErrorDesc": "Sipariş için restoranda olmalısınız.",
+    "permissionDenied": "Konum izni reddedildi",
+    "items": "Ürün",
+    "total": "Toplam Tutar",
+    "orderSent": "Siparişiniz alındı! Mutfak hazırlanıyor.",
+    "orderError": "Sipariş verilemedi. Lütfen tekrar deneyin."
+  },
+  "Service": {
+    "waiter": "Garson Çağır",
+    "coal": "Köz İste",
+    "bill": "Hesap İste",
+    "waiterSent": "Garsona haber verildi",
+    "coalSent": "Köz isteğiniz iletildi",
+    "billSent": "Hesap isteğiniz iletildi",
+    "cooldown": "Lütfen {seconds} saniye bekleyin",
+    "locationError": "Konum izni olmadan bu özelliği kullanamazsınız."
+  },
+  "Rating": {
+    "title": "Deneyiminizi Puanlayın",
+    "placeholder": "Düşüncelerinizi paylaşın...",
+    "submit": "Gönder",
+    "success": "Teşekkürler! Puanınız kaydedildi.",
+    "error": "Puan gönderilemedi",
+    "alreadyRated": "Bu sipariş için zaten oy kullandınız."
+  },
+  "Permission": {
+    "browserUnsupported": "Tarayıcınız konum hizmetlerini desteklemiyor.",
+    "permissionGranted": "Konum izni verildi! ✅",
+    "permissionDeniedToast": "Konum izni reddedildi.",
+    "locationServicesOff": "Konum servisleri kapalı. Cihazınızın konum ayarlarını açın.",
+    "locationFetchError": "Konum alınamadı. Tekrar deneyin.",
+    "errorGeneric": "Bir hata oluştu. Lütfen tekrar deneyin.",
+    "locationDisabledTitle": "Konum Servisleri Kapalı",
+    "locationDisabledDesc": "GPS/Konum servislerini aktif edin.",
+    "tooFarTitle": "Restoranda Değilsiniz",
+    "tooFarDesc": "Restorandan {distance}m uzaktasınız. Sipariş için (max 50m) yaklaşmalısınız.",
+    "tooFarDescSimple": "Sipariş verebilmek için restoranda olmalısınız.",
+    "permissionDeniedTitle": "Konum İzni Reddedildi",
+    "permissionDeniedDesc": "Tarayıcınız konum iznini engelliyor. Manuel olarak izin vermeniz gerekiyor.",
+    "verifyTitle": "Konum Doğrulaması",
+    "verifyDesc": "Sipariş verebilmek için konumunuza erişim izni vermeniz gerekmektedir.",
+    "allow": "İzin Ver",
+    "cancel": "Kapat",
+    "close": "Kapat",
+    "understand": "Anladım",
+    "checkAgain": "Tekrar Kontrol Et",
+    "howToAllow": "Nasıl İzin Veririm?",
+    "ok": "Tamam",
+    "checking": "Kontrol Ediliyor...",
+    "safeOrder": "Güvenli sipariş verebilirsiniz",
+    "callWaiter": "Garson çağırabilirsiniz",
+    "requestBill": "Hesap isteyebilirsiniz",
+    "safetyWarning": "Güvenlik: Sadece restorandayken sipariş verebilirsiniz",
+    "privacyNote": "Konumunuz sadece doğrulama için kullanılır ve asla saklanmaz.",
+    "instructions": {
+      "chromeTitle": "Chrome/Edge",
+      "chromeStep1": "Kilit simgesine tıklayın",
+      "chromeStep2": "Konum -> İzin Ver",
+      "chromeStep3": "İzin Ver'i seçin",
+      "chromeStep4": "Sayfayı yenileyin",
+      "mobileTitle": "Mobil (Safari/Chrome)",
+      "mobileStep1": "Ayarlar -> Safari/Chrome",
+      "mobileStep2": "Konum -> İzin Ver",
+      "mobileStep3": "Sayfayı yenileyin",
+      "refreshNote": "Sayfayı yenilemeyi unutmayın"
+    }
+  },
+  "Footer": {
+    "poweredBy": "RestQR ile güçlendirildi"
+  }
+}
