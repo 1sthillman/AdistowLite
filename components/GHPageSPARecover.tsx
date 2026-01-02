@@ -23,26 +23,28 @@ export default function GHPageSPARecover() {
         const q = searchParams.get('q');
 
         if (p !== null) {
-            // Construct the real path
-            // Normalizing path to avoid double slashes and ensure it starts with /
-            let targetPath = p;
+            // Decode the path
+            let targetPath = decodeURIComponent(p);
             if (!targetPath.startsWith('/')) {
                 targetPath = '/' + targetPath;
             }
 
-            // Append original query params if they exist
+            // Decode and append original query params if they exist
             if (q) {
-                targetPath += '?' + q.replace(/~and~/g, '&');
+                const decodedQuery = decodeURIComponent(q);
+                targetPath += (targetPath.includes('?') ? '&' : '?') + decodedQuery.replace(/~and~/g, '&');
             }
 
-            console.log('[SPA Recover] Redirecting to:', targetPath);
+            console.log('[SPA Recover] Target Path:', targetPath);
 
-            // Use router.replace to update Next.js internal state
-            // and window.history.replaceState to clean up the URL for the user
+            // 1. Tell Next.js router to go to the real path
             router.replace(targetPath);
 
-            // Clean up the URL by removing the 404 params
-            const cleanUrl = window.location.origin + window.location.pathname.replace(/\/$/, '') + targetPath + window.location.hash;
+            // 2. Clean up the browser URL bar so the user doesn't see ?p=...
+            const repoName = '/AdistowLite';
+            // We want the browser bar to show: origin + repoName + targetPath
+            const cleanUrl = window.location.origin + repoName + (targetPath.startsWith('/') ? targetPath : '/' + targetPath) + window.location.hash;
+
             window.history.replaceState(null, '', cleanUrl);
         }
     }, [router, searchParams]);
