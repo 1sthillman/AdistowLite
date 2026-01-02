@@ -1,58 +1,49 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 
 /**
  * GHPageSPARecover
  * 
- * Final version with loop protection.
+ * Safely cleans the browser URL bar (?p=/menu/...) without triggering a Next.js 
+ * navigation that might fail on GH Pages (static export).
  */
 export default function GHPageSPARecover() {
-    const router = useRouter();
     const searchParams = useSearchParams();
-    const currentPathname = usePathname();
-    const hasRecovered = useRef(false);
+    const hasCleaned = useRef(false);
 
     useEffect(() => {
-        if (typeof window === 'undefined' || hasRecovered.current) return;
+        if (typeof window === 'undefined' || hasCleaned.current) return;
 
         const p = searchParams.get('p');
         const q = searchParams.get('q');
 
         if (p !== null) {
-            hasRecovered.current = true;
+            hasCleaned.current = true;
 
-            // 1. Decode target
+            // 1. Construct target display path
             let targetPath = decodeURIComponent(p);
             if (!targetPath.startsWith('/')) targetPath = '/' + targetPath;
 
             if (q) {
                 const decodedQuery = decodeURIComponent(q);
-                targetPath += (targetPath.includes('?') ? '&' : '?') + decodedQuery.replace(/~and~/g, '&');
+                const connector = targetPath.includes('?') ? '&' : '?';
+                targetPath += connector + decodedQuery.replace(/~and~/g, '&');
             }
 
-            // 2. Prevent redundant navigation
-            // targetPath is e.g. /tr/menu/...
-            // currentPathname is e.g. /AdistowLite/ (at the root)
+            console.log('[SPA] Cleaning URL bar to:', targetPath);
 
-            console.log('[SPA] Recovery path:', targetPath);
-
-            // 3. Clean Browser URL immediately
-            const repoName = '/AdistowLite';
+            // 2. Clean Browser URL bar ONLY
+            const isProd = window.location.hostname !== 'localhost';
+            const repoName = isProd ? '/AdistowLite' : '';
             const cleanUrl = window.location.origin + repoName + targetPath + window.location.hash;
 
-            // We update the address bar BEFORE Calling router.replace
-            // This ensures that if router.replace reloads, it hits the 404 again 
-            // but Next.js internal state is updated.
+            // silent update - This keeps the pretty URL in the address bar 
+            // but Next.js stays on the current (working) page.
             window.history.replaceState(null, '', cleanUrl);
-
-            // 4. Trigger Next.js Routing
-            // Because we have used a CATCH-ALL route, Next.js should match this
-            // and perform a CLIENT-SIDE transition!
-            router.replace(targetPath);
         }
-    }, [router, searchParams, currentPathname]);
+    }, [searchParams]);
 
     return null;
 }

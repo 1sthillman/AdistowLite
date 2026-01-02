@@ -1,32 +1,38 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function HomePage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
   const hasRedirected = useRef(false);
 
   useEffect(() => {
     if (hasRedirected.current) return;
 
-    const path = window.location.pathname.replace(/\/$/, '');
-    const repoName = '/AdistowLite';
+    const isProd = window.location.hostname !== 'localhost';
+    const repoName = isProd ? '/AdistowLite' : '';
+    const path = window.location.pathname;
 
     // Redirect root to /tr/ while preserving all search params (?p=...&q=...)
-    if (path === '' || path === repoName || path === '/') {
+    // Root check: either exactly repoName, or repoName + /
+    if (path === repoName || path === repoName + '/') {
       hasRedirected.current = true;
+
       const search = window.location.search || '';
       const hash = window.location.hash || '';
-      router.replace('/tr/' + search + hash);
+      const nextUrl = repoName + '/tr/' + search + hash;
+
+      console.log('[Root] Redirecting to localized entry:', nextUrl);
+      window.location.replace(nextUrl);
     }
-  }, [router, searchParams]);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-emerald-500 mb-4"></div>
-      <p className="text-gray-500 font-medium animate-pulse">RestQR Yükleniyor...</p>
+    <div style={{ background: '#0A0A0A', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: 'sans-serif' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ width: '30px', height: '30px', border: '2px solid rgba(217, 119, 6, 0.2)', borderTopColor: '#D97706', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }}></div>
+        <p style={{ color: '#444', fontSize: '0.9rem' }}>RestQR...</p>
+        <style dangerouslySetInnerHTML={{ __html: '@keyframes spin { to { transform: rotate(360deg); } }' }} />
+      </div>
     </div>
   );
 }
