@@ -9,13 +9,17 @@ export default function HomePage() {
   const hasRedirected = useRef(false);
 
   useEffect(() => {
-    // If we're already handling a recovery, don't interfere
-    if (searchParams.get('p') || hasRedirected.current) return;
+    if (hasRedirected.current) return;
 
-    // Check if we are at the root
-    if (window.location.pathname === '/' || window.location.pathname === '/AdistowLite' || window.location.pathname === '/AdistowLite/') {
+    const path = window.location.pathname.replace(/\/$/, '');
+    const repoName = '/AdistowLite';
+
+    // Redirect root to /tr/ while preserving all search params (?p=...&q=...)
+    if (path === '' || path === repoName || path === '/') {
       hasRedirected.current = true;
-      router.replace('/tr');
+      const search = window.location.search || '';
+      const hash = window.location.hash || '';
+      router.replace('/tr/' + search + hash);
     }
   }, [router, searchParams]);
 
