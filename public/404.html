@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>RestQR - Yönlendiriliyorsunuz...</title>
+    <script type="text/javascript">
+        // GitHub Pages SPA Routing Hack
+        // preserves the path so the client-side router can take over
+        var segmentCount = 1; // AdistowLite is the first segment
+        var l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + segmentCount).join('/') + '/index.html?p=/' +
+            l.pathname.split('/').slice(1 + segmentCount).join('/').replace(/&/g, '~and~') +
+            (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+            l.hash
+        );
+    </script>
+</head>
+<body style="background: #0A0A0A; color: white; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh;">
+    <div style="text-align: center;">
+        <h1 style="font-size: 2rem; font-weight: bold; margin-bottom: 1rem;">RestQR</h1>
+        <p style="color: #666;">Menü Yükleniyor...</p>
+    </div>
+</body>
+</html>
