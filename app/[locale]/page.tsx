@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { QrCode, ArrowRight, Globe } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -13,19 +13,26 @@ interface HomePageProps {
 export default function HomePage({ params }: HomePageProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isMounted, setIsMounted] = useState(false);
   const [restaurantSlug, setRestaurantSlug] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- In-line Menu Recovery for GitHub Pages SPA ---
+  // 1. Ensure hydration match by waiting for mount
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // --- In-line Menu Recovery ---
   const p = searchParams.get('p');
-  if (p && p.includes('/menu/')) {
+  const isMenuPath = p && p.includes('/menu/');
+
+  // If we are on a recovery path and mounted, render the Menu
+  if (isMounted && isMenuPath) {
     const parts = p.split('/').filter(Boolean);
     const menuIndex = parts.indexOf('menu');
     if (menuIndex !== -1) {
       const slug = parts[menuIndex + 1];
       const tableId = parts[menuIndex + 2];
-
-      console.log('[Home Resolver] Rendering Menu Inline:', { slug, tableId });
 
       return (
         <MenuPageClient
@@ -43,7 +50,8 @@ export default function HomePage({ params }: HomePageProps) {
     e.preventDefault();
     if (restaurantSlug.trim()) {
       setIsLoading(true);
-      router.push(`/${params.locale}/menu/${restaurantSlug}/`);
+      // We use a query param approach for consistency in dev
+      router.push(`/${params.locale}/?p=${encodeURIComponent('/menu/' + restaurantSlug + '/')}`);
     }
   };
 
@@ -52,9 +60,17 @@ export default function HomePage({ params }: HomePageProps) {
     router.push(`/${newLocale}`);
   };
 
+  // If not mounted yet, render a skeleton/empty to match server
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center">
+        <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-restqr-emerald-50 to-restqr-gold-50 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center p-4 text-gray-900 dark:text-gray-100">
-      {/* Language Switcher */}
       <div className="absolute top-4 right-4">
         <button
           onClick={toggleLanguage}
@@ -73,7 +89,6 @@ export default function HomePage({ params }: HomePageProps) {
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        {/* Logo/Header */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0.8 }}
@@ -83,17 +98,12 @@ export default function HomePage({ params }: HomePageProps) {
           >
             <QrCode className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-3xl font-bold mb-2">
-            RestQR
-          </h1>
+          <h1 className="text-3xl font-bold mb-2">RestQR</h1>
           <p className="text-gray-600 dark:text-gray-400">
-            {params.locale === 'tr'
-              ? 'Modern QR Menü Sistemi'
-              : 'Modern QR Menu System'}
+            {params.locale === 'tr' ? 'Modern QR Menü Sistemi' : 'Modern QR Menu System'}
           </p>
         </div>
 
-        {/* QR Code Simulation */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -118,7 +128,6 @@ export default function HomePage({ params }: HomePageProps) {
                 required
               />
             </div>
-
             <motion.button
               type="submit"
               disabled={isLoading}
@@ -136,18 +145,6 @@ export default function HomePage({ params }: HomePageProps) {
               )}
             </motion.button>
           </form>
-        </motion.div>
-
-        {/* Demo Info */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-6 p-4 bg-white/50 dark:bg-gray-900/30 rounded-lg backdrop-blur-sm"
-        >
-          <p className="text-sm text-gray-600 dark:text-gray-500 text-center">
-            💡 {params.locale === 'tr' ? 'Denemek için "demo" yazın' : 'Try typing "demo"'}
-          </p>
         </motion.div>
       </motion.div>
     </div>
