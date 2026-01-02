@@ -9,7 +9,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 import { MenuItem, Category } from '@/types/menu';
 import ServiceButtons from '@/components/ServiceButtons';
 import CartButton from '@/components/CartButton';
-import { collection, onSnapshot, doc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, query, where, getDocs, limit } from 'firebase/firestore';
 import { db, isConfigValid } from '@/lib/firebase';
 import { AlertTriangle } from 'lucide-react';
 import RatingModal from '@/components/RatingModal';
@@ -20,6 +20,7 @@ interface MenuPageClientProps {
         locale: string;
         slug: string;
         table?: string;
+        tableId?: string;
     };
 }
 
@@ -85,55 +86,90 @@ export default function MenuPageClient({ params }: MenuPageClientProps) {
             setLoading(false);
         };
 
-        // 1. Restaurant Listener
-        const unsubRestaurant = onSnapshot(doc(db, 'restaurants', restaurantSlug), (snap) => {
-            if (!snap.exists()) {
-                setError('restaurantNotFound');
-                setLoading(false);
-                return;
-            }
-            currentRestaurant = { ...snap.data(), id: snap.id };
-            updateMenuState();
-        });
+        let masterUid = restaurantSlug;
 
-        // 2. Categories Listener
-        const unsubCategories = onSnapshot(collection(db, 'restaurants', restaurantSlug, 'categories'), (snap) => {
-            currentCategories = snap.docs.map(d => ({ id: d.id, ...d.data() } as Category));
-            updateMenuState();
-        });
+        const startListeners = (uid: string) => {
+            masterUid = uid;
 
-        // 3. Products Listener
-        const unsubProducts = onSnapshot(collection(db, 'restaurants', restaurantSlug, 'products'), (snap) => {
-            currentProducts = snap.docs
-                .map(d => {
-                    const data = d.data();
-                    const price = Number(data.price || data.basePrice || 0);
-                    return {
-                        id: d.id,
-                        ...data,
-                        price: price,
-                        basePrice: price, // Force normalization
-                        ingredients: data.ingredients || [],
-                        extras: data.extras || []
-                    };
-                })
-                .filter((p: any) => p.isActive !== false) as MenuItem[];
-            updateMenuState();
-        });
-
-        // 4. Settings Listener
-        const unsubSettings = onSnapshot(doc(db, 'restaurants', restaurantSlug, 'settings', 'general'), (snap) => {
-            if (snap.exists()) {
-                currentSettings = { ...currentSettings, ...snap.data() };
+            // 2. Categories Listener
+            const unsubCategories = onSnapshot(collection(db, 'restaurants', uid, 'categories'), (snap) => {
+                currentCategories = snap.docs.map(d => ({ id: d.id, ...d.data() } as Category));
                 updateMenuState();
+            });
+
+            // 3. Products Listener
+            const unsubProducts = onSnapshot(collection(db, 'restaurants', uid, 'products'), (snap) => {
+                currentProducts = snap.docs
+                    .map(d => {
+                        const data = d.data();
+                        const price = Number(data.price || data.basePrice || 0);
+                        return {
+                            id: d.id,
+                            ...data,
+                            price: price,
+                            basePrice: price, // Force normalization
+                            ingredients: data.ingredients || [],
+                            extras: data.extras || []
+                        };
+                    })
+                    .filter((p: any) => p.isActive !== false) as MenuItem[];
+                updateMenuState();
+            });
+
+            // 4. Settings Listener
+            const unsubSettings = onSnapshot(doc(db, 'restaurants', uid, 'settings', 'general'), (snap) => {
+                if (snap.exists()) {
+                    currentSettings = { ...currentSettings, ...snap.data() };
+                    updateMenuState();
+                }
+            });
+
+            return () => {
+                unsubCategories();
+                unsubProducts();
+                unsubSettings();
+            };
+        };
+
+        let activeUnsubs: (() => void)[] = [];
+
+        // 1. Restaurant Master Discovery
+        const unsubDiscovery = onSnapshot(doc(db, 'restaurants', restaurantSlug), async (snap) => {
+            if (snap.exists()) {
+                currentRestaurant = { ...snap.data(), id: snap.id };
+                if (activeUnsubs.length <= 1) { // 1 because unsubDiscovery is already in
+                    const cleanup = startListeners(snap.id);
+                    activeUnsubs.push(cleanup);
+                }
+                updateMenuState();
+            } else {
+                // Not found by ID, try looking up by SLUG field
+                try {
+                    const q = query(collection(db, 'restaurants'), where('slug', '==', restaurantSlug), limit(1));
+                    const querySnap = await getDocs(q);
+
+                    if (!querySnap.empty) {
+                        const masterSnap = querySnap.docs[0];
+                        currentRestaurant = { ...masterSnap.data(), id: masterSnap.id };
+                        const cleanup = startListeners(masterSnap.id);
+                        activeUnsubs.push(cleanup);
+                        updateMenuState();
+                    } else {
+                        setError('restaurantNotFound');
+                        setLoading(false);
+                    }
+                } catch (err) {
+                    console.error("Slug lookup error:", err);
+                    setError('restaurantNotFound');
+                    setLoading(false);
+                }
             }
         });
+
+        activeUnsubs.push(unsubDiscovery);
 
         return () => {
-            unsubRestaurant();
-            unsubCategories();
-            unsubProducts();
-            unsubSettings();
+            activeUnsubs.forEach(fn => fn && typeof fn === 'function' && fn());
         };
     }, [params.slug]);
 
@@ -170,12 +206,24 @@ export default function MenuPageClient({ params }: MenuPageClientProps) {
         );
     }
 
+    const tableIdentifier = params.tableId || params.table || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('table') : '') || '1';
+
+    // 1. First try to find by qrCodeId (Secure)
+    // 2. Fallback to finding by numeric string ID (Legacy)
+    const currentTable = menuData.restaurant.tables?.find((t: any) =>
+        (t.qrCodeId && t.qrCodeId === tableIdentifier) ||
+        (t.id.toString() === tableIdentifier.toString())
+    );
+
+    const resolvedTableId = currentTable ? currentTable.id.toString() : tableIdentifier;
+    const resolvedTableName = currentTable ? currentTable.name : (tableIdentifier ? `Masa ${tableIdentifier}` : undefined);
+
     return (
         <div className="min-h-screen bg-transparent text-white relative pb-32">
             {/* Hero HEADER (Fixed - Invisible) */}
             <MenuHeader
                 restaurant={menuData.restaurant}
-                tableNumber={params.table || '1'}
+                tableNumber={resolvedTableName}
                 onRatingClick={() => setRatingModalOpen(true)}
                 ratingSystemEnabled={menuData.settings?.ratingSystemEnabled}
             />
@@ -183,9 +231,9 @@ export default function MenuPageClient({ params }: MenuPageClientProps) {
             {/* Spacer removed (seamless) */}
 
             <ServiceButtons
-                restaurantId={params.slug}
-                tableId={params.table || '1'}
-                tableName={menuData.restaurant.tables?.find((t: any) => t.id.toString() === (params.table || '1'))?.name || `Masa ${params.table || '1'}`}
+                restaurantId={menuData.restaurant.id || menuData.restaurant.uid}
+                tableId={resolvedTableId}
+                tableName={resolvedTableName}
                 location={menuData.restaurant.coordinates}
                 waiterCallEnabled={menuData.settings?.waiterCallEnabled}
                 coalRequestEnabled={menuData.settings?.coalRequestEnabled}
@@ -206,9 +254,9 @@ export default function MenuPageClient({ params }: MenuPageClientProps) {
             />
 
             <CartButton
-                restaurantId={params.slug}
-                tableId={params.table || '1'}
-                tableName={menuData.restaurant.tables?.find((t: any) => t.id.toString() === (params.table || '1'))?.name || `Masa ${params.table || '1'}`}
+                restaurantId={menuData.restaurant.id || menuData.restaurant.uid}
+                tableId={resolvedTableId}
+                tableName={resolvedTableName}
                 location={menuData.restaurant.coordinates}
                 onOrderSuccess={() => {
                     if (menuData.settings?.ratingSystemEnabled !== false) {
@@ -227,7 +275,7 @@ export default function MenuPageClient({ params }: MenuPageClientProps) {
             <RatingModal
                 isOpen={ratingModalOpen}
                 onClose={() => setRatingModalOpen(false)}
-                restaurantId={params.slug}
+                restaurantId={menuData.restaurant.id}
                 restaurantName={menuData.restaurant.name}
             />
         </div>
