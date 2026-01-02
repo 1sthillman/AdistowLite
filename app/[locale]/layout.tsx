@@ -61,7 +61,7 @@ export default async function LocaleLayout({
             __html: `
               (function() {
                 // Restore path from 404.html redirect
-                var segmentCount = 1;
+                var segmentCount = 1; // AdistowLite
                 var l = window.location;
                 if (l.search) {
                   var q = {};
@@ -70,11 +70,16 @@ export default async function LocaleLayout({
                     q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&');
                   });
                   if (q.p !== undefined) {
-                    window.history.replaceState(null, null,
-                      l.pathname.slice(0, -10) + (q.p || '') +
+                    // Normalize path to avoid double slashes
+                    var path = q.p || '';
+                    if (!path.startsWith('/')) path = '/' + path;
+                    
+                    // basePath is /AdistowLite
+                    var newPath = l.pathname.replace(/index\.html$/, '').replace(/\/$/, '') + path +
                       (q.q ? ('?' + q.q) : '') +
-                      l.hash
-                    );
+                      l.hash;
+                    
+                    window.history.replaceState(null, null, newPath.replace(/\/+/g, '/'));
                   }
                 }
 
