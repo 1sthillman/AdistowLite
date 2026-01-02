@@ -26,6 +26,7 @@ interface MenuPageClientProps {
 
 export default function MenuPageClient({ params }: MenuPageClientProps) {
     const [menuData, setMenuData] = useState<any>(null);
+    const [tables, setTables] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [selectedProduct, setSelectedProduct] = useState<MenuItem | null>(null);
@@ -124,10 +125,17 @@ export default function MenuPageClient({ params }: MenuPageClientProps) {
                 }
             });
 
+            // 4. Tables Listener
+            const unsubTables = onSnapshot(collection(db, 'restaurants', uid, 'tables'), (snap) => {
+                const loaded = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                setTables(loaded);
+            });
+
             return () => {
                 unsubCategories();
                 unsubProducts();
                 unsubSettings();
+                unsubTables();
             };
         };
 
@@ -210,12 +218,13 @@ export default function MenuPageClient({ params }: MenuPageClientProps) {
 
     // 1. First try to find by qrCodeId (Secure)
     // 2. Fallback to finding by numeric string ID (Legacy)
-    const currentTable = menuData.restaurant.tables?.find((t: any) =>
+    const currentTable = tables.find((t: any) =>
         (t.qrCodeId && t.qrCodeId === tableIdentifier) ||
-        (t.id.toString() === tableIdentifier.toString())
+        (t.id?.toString() === tableIdentifier.toString()) ||
+        (t.id === tableIdentifier)
     );
 
-    const resolvedTableId = currentTable ? currentTable.id.toString() : tableIdentifier;
+    const resolvedTableId = currentTable ? (currentTable.id?.toString() || tableIdentifier) : tableIdentifier;
     const resolvedTableName = currentTable ? currentTable.name : (tableIdentifier ? `Masa ${tableIdentifier}` : undefined);
 
     return (

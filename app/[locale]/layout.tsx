@@ -55,11 +55,29 @@ export default async function LocaleLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} ${jetbrains.variable} font-sans antialiased text-[#FAF7F2] min-h-screen selection:bg-[#D97706]/30 selection:text-white overflow-x-hidden`}>
 
-        {/* Suppress Noisy Extension Errors (MetaMask, Grammarly, etc) */}
+        {/* SPA Routing Handlers */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
+                // Restore path from 404.html redirect
+                var segmentCount = 1;
+                var l = window.location;
+                if (l.search) {
+                  var q = {};
+                  l.search.slice(1).split('&').forEach(function(v) {
+                    var a = v.split('=');
+                    q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&');
+                  });
+                  if (q.p !== undefined) {
+                    window.history.replaceState(null, null,
+                      l.pathname.slice(0, -10) + (q.p || '') +
+                      (q.q ? ('?' + q.q) : '') +
+                      l.hash
+                    );
+                  }
+                }
+
                 const suppressedErrors = [
                   'MetaMask', 
                   'ethereum', 
