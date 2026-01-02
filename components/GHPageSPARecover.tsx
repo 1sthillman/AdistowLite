@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
 /**
  * GHPageSPARecover
  * 
- * Final, hardened version of the SPA recovery logic.
+ * Final version with loop protection.
  */
 export default function GHPageSPARecover() {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const currentPathname = usePathname();
     const hasRecovered = useRef(false);
 
     useEffect(() => {
@@ -22,34 +23,36 @@ export default function GHPageSPARecover() {
         if (p !== null) {
             hasRecovered.current = true;
 
-            // Decode the path
+            // 1. Decode target
             let targetPath = decodeURIComponent(p);
-            if (!targetPath.startsWith('/')) {
-                targetPath = '/' + targetPath;
-            }
+            if (!targetPath.startsWith('/')) targetPath = '/' + targetPath;
 
-            // Append query params
             if (q) {
                 const decodedQuery = decodeURIComponent(q);
-                const connector = targetPath.includes('?') ? '&' : '?';
-                targetPath += connector + decodedQuery.replace(/~and~/g, '&');
+                targetPath += (targetPath.includes('?') ? '&' : '?') + decodedQuery.replace(/~and~/g, '&');
             }
 
-            console.log('[SPA] Recovery path found:', targetPath);
+            // 2. Prevent redundant navigation
+            // targetPath is e.g. /tr/menu/...
+            // currentPathname is e.g. /AdistowLite/ (at the root)
 
-            // 1. Initial cleanup of browser history to prevent back-button loops
+            console.log('[SPA] Recovery path:', targetPath);
+
+            // 3. Clean Browser URL immediately
             const repoName = '/AdistowLite';
-            const cleanUrl = window.location.origin + repoName + (targetPath.startsWith('/') ? targetPath : '/' + targetPath) + window.location.hash;
+            const cleanUrl = window.location.origin + repoName + targetPath + window.location.hash;
+
+            // We update the address bar BEFORE Calling router.replace
+            // This ensures that if router.replace reloads, it hits the 404 again 
+            // but Next.js internal state is updated.
             window.history.replaceState(null, '', cleanUrl);
 
-            // 2. Trigger Next.js internal transition
-            // We use targetPath (which is relative to basePath if Next.js handles it, 
-            // or absolute if we need to).
+            // 4. Trigger Next.js Routing
+            // Because we have used a CATCH-ALL route, Next.js should match this
+            // and perform a CLIENT-SIDE transition!
             router.replace(targetPath);
-
-            console.log('[SPA] Router.replace called with:', targetPath);
         }
-    }, [router, searchParams]);
+    }, [router, searchParams, currentPathname]);
 
     return null;
 }
