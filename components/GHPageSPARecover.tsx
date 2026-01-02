@@ -1,51 +1,53 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
+import { useEffect, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 /**
  * GHPageSPARecover
  * 
- * GitHub Pages does not support SPA routing natively.
- * We use 404.html to redirect all unknown routes to index.html with a ?p= query param.
- * This component reads that param and programmatically updates the Next.js router
- * to ensure the correct dynamic page is loaded without a hard refresh.
+ * Final, hardened version of the SPA recovery logic.
  */
 export default function GHPageSPARecover() {
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
+    const hasRecovered = useRef(false);
 
     useEffect(() => {
-        if (typeof window === 'undefined') return;
+        if (typeof window === 'undefined' || hasRecovered.current) return;
 
         const p = searchParams.get('p');
         const q = searchParams.get('q');
 
         if (p !== null) {
+            hasRecovered.current = true;
+
             // Decode the path
             let targetPath = decodeURIComponent(p);
             if (!targetPath.startsWith('/')) {
                 targetPath = '/' + targetPath;
             }
 
-            // Decode and append original query params if they exist
+            // Append query params
             if (q) {
                 const decodedQuery = decodeURIComponent(q);
-                targetPath += (targetPath.includes('?') ? '&' : '?') + decodedQuery.replace(/~and~/g, '&');
+                const connector = targetPath.includes('?') ? '&' : '?';
+                targetPath += connector + decodedQuery.replace(/~and~/g, '&');
             }
 
-            console.log('[SPA Recover] Target Path:', targetPath);
+            console.log('[SPA] Recovery path found:', targetPath);
 
-            // 1. Tell Next.js router to go to the real path
+            // 1. Initial cleanup of browser history to prevent back-button loops
+            const repoName = '/AdistowLite';
+            const cleanUrl = window.location.origin + repoName + (targetPath.startsWith('/') ? targetPath : '/' + targetPath) + window.location.hash;
+            window.history.replaceState(null, '', cleanUrl);
+
+            // 2. Trigger Next.js internal transition
+            // We use targetPath (which is relative to basePath if Next.js handles it, 
+            // or absolute if we need to).
             router.replace(targetPath);
 
-            // 2. Clean up the browser URL bar so the user doesn't see ?p=...
-            const repoName = '/AdistowLite';
-            // We want the browser bar to show: origin + repoName + targetPath
-            const cleanUrl = window.location.origin + repoName + (targetPath.startsWith('/') ? targetPath : '/' + targetPath) + window.location.hash;
-
-            window.history.replaceState(null, '', cleanUrl);
+            console.log('[SPA] Router.replace called with:', targetPath);
         }
     }, [router, searchParams]);
 
