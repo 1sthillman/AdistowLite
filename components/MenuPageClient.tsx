@@ -214,7 +214,28 @@ export default function MenuPageClient({ params }: MenuPageClientProps) {
         );
     }
 
-    const tableIdentifier = params.tableId || params.table || (typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('table') : '') || '1';
+    const getTableIdentifierFromUrl = () => {
+        if (typeof window === 'undefined') return '1';
+
+        // 1. Next.js Params (Standard)
+        if (params.tableId) return params.tableId;
+        if (params.table) return params.table;
+
+        // 2. Query Params fallback (?table=X)
+        const sp = new URLSearchParams(window.location.search);
+        if (sp.get('table')) return sp.get('table')!;
+
+        // 3. Pathname fallback (/menu/slug/tableId)
+        const parts = window.location.pathname.split('/').filter(Boolean);
+        if (parts.length >= 3 && parts.includes('menu')) {
+            const menuIdx = parts.indexOf('menu');
+            if (parts[menuIdx + 2]) return parts[menuIdx + 2];
+        }
+
+        return '1';
+    };
+
+    const tableIdentifier = getTableIdentifierFromUrl();
 
     // 1. First try to find by qrCodeId (Secure)
     // 2. Fallback to finding by numeric string ID (Legacy)

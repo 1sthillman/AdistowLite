@@ -3,6 +3,8 @@ import { Toaster } from 'react-hot-toast';
 import { Viewport } from 'next';
 import BackgroundBokeh from '@/components/BackgroundBokeh';
 import { CartProvider } from '@/context/CartContext';
+import GHPageSPARecover from '@/components/GHPageSPARecover';
+import { Suspense } from 'react';
 
 // Standard font stacks to avoid build-time fetch errors in CI
 const inter = { variable: '--font-inter' };
@@ -70,15 +72,10 @@ export default async function LocaleLayout({
                     q[a[0]] = a.slice(1).join('=').replace(/~and~/g, '&');
                   });
                   if (q.p !== undefined) {
-                    // Normalize path to avoid double slashes
+                    // Pre-hydration URL cleanup to prevent flash
                     var path = q.p || '';
                     if (!path.startsWith('/')) path = '/' + path;
-                    
-                    // basePath is /AdistowLite
-                    var newPath = l.pathname.replace(/index\.html$/, '').replace(/\/$/, '') + path +
-                      (q.q ? ('?' + q.q) : '') +
-                      l.hash;
-                    
+                    var newPath = l.pathname.replace(/index\.html$/, '').replace(/\/$/, '') + path + (q.q ? ('?' + q.q) : '') + l.hash;
                     window.history.replaceState(null, null, newPath.replace(/\/+/g, '/'));
                   }
                 }
@@ -119,6 +116,9 @@ export default async function LocaleLayout({
         <BackgroundBokeh />
 
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <Suspense fallback={null}>
+            <GHPageSPARecover />
+          </Suspense>
           <CartProvider>
             <main className="relative z-10 min-h-screen flex flex-col">
               {children}
