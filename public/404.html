@@ -5,27 +5,24 @@
     <meta charset="utf-8">
     <title>RestQR - Yönlendiriliyorsunuz...</title>
     <script type="text/javascript">
-        // GitHub Pages SPA Routing Hack
         (function () {
             var l = window.location;
-            var path = l.pathname;
             var repoName = '/AdistowLite';
+            var relativePath = l.pathname;
 
-            // If the path starts with the repo name, strip it for the 'p' parameter
-            var relativePath = path;
-            if (path.startsWith(repoName)) {
-                relativePath = path.substring(repoName.length);
+            if (relativePath.startsWith(repoName)) {
+                relativePath = relativePath.substring(repoName.length);
             }
 
-            // Normalize relativePath
             if (!relativePath.startsWith('/')) relativePath = '/' + relativePath;
 
-            var redirectUrl = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-                repoName + '/index.html?p=' + encodeURIComponent(relativePath) +
-                (l.search ? '&q=' + encodeURIComponent(l.search.slice(1)) : '') +
-                l.hash;
+            // Redirect to root with p (path) and q (query) params
+            var url = l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + repoName + '/';
+            url += '?p=' + encodeURIComponent(relativePath);
+            if (l.search) url += '&q=' + encodeURIComponent(l.search.slice(1));
+            url += l.hash;
 
-            l.replace(redirectUrl);
+            l.replace(url);
         })();
     </script>
 </head>
