@@ -46,8 +46,10 @@ export function useGeofence(targetLocation?: Location, maxDistance: number = DEF
                     longitude: position.coords.longitude,
                 };
 
-                // If no target location, allow (for testing)
-                if (!targetLocation) {
+                // If no target location OR localhost, allow (for testing)
+                const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+                if (!targetLocation || isLocal) {
                     setIsWithinRange(true);
                     setIsChecking(false);
                     return;

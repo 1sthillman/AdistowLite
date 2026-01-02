@@ -38,44 +38,89 @@ export const metadata = {
   },
 };
 
-export default function LocaleLayout({
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, unstable_setRequestLocale } from 'next-intl/server';
+
+export default async function LocaleLayout({
   children,
   params: { locale }
 }: {
   children: React.ReactNode;
   params: { locale: string };
 }) {
+  unstable_setRequestLocale(locale);
+  const messages = await getMessages();
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} ${jetbrains.variable} font-sans antialiased text-[#FAF7F2] min-h-screen selection:bg-[#D97706]/30 selection:text-white overflow-x-hidden`}>
 
+        {/* Suppress Noisy Extension Errors (MetaMask, Grammarly, etc) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const suppressedErrors = [
+                  'MetaMask', 
+                  'ethereum', 
+                  'inpage.js', 
+                  'Grammarly', 
+                  'extension', 
+                  'Could not establish connection', 
+                  'Receiving end does not exist'
+                ];
+                const isSuppressed = (m) => m && suppressedErrors.some(s => m.toString().toLowerCase().includes(s.toLowerCase()));
+
+                window.addEventListener('error', (e) => {
+                  if (isSuppressed(e.message) || isSuppressed(e.filename)) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    console.warn('[UI Warning - Suppressed Extension Error]:', e.message);
+                  }
+                }, true);
+
+                window.addEventListener('unhandledrejection', (e) => {
+                  const reason = (e.reason && (e.reason.message || e.reason)) || '';
+                  if (isSuppressed(reason)) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    console.warn('[UI Warning - Suppressed Extension Rejection]:', reason);
+                  }
+                }, true);
+              })();
+            `
+          }}
+        />
+
         {/* Animated Bokeh & Glass Background */}
         <BackgroundBokeh />
 
-        <CartProvider>
-          <main className="relative z-10 min-h-screen flex flex-col">
-            {children}
-          </main>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <CartProvider>
+            <main className="relative z-10 min-h-screen flex flex-col">
+              {children}
+            </main>
 
-          <Toaster
-            position="top-center"
-            toastOptions={{
-              className: 'font-sans font-medium',
-              style: {
-                background: '#1A1A1A',
-                color: '#FAF7F2',
-                border: '1px solid rgba(250, 247, 242, 0.1)',
-                backdropFilter: 'blur(10px)',
-              },
-              success: {
-                iconTheme: {
-                  primary: '#D97706',
-                  secondary: '#FAF7F2',
+            <Toaster
+              position="top-center"
+              toastOptions={{
+                className: 'font-sans font-medium',
+                style: {
+                  background: '#1A1A1A',
+                  color: '#FAF7F2',
+                  border: '1px solid rgba(250, 247, 242, 0.1)',
+                  backdropFilter: 'blur(10px)',
                 },
-              },
-            }}
-          />
-        </CartProvider>
+                success: {
+                  iconTheme: {
+                    primary: '#D97706',
+                    secondary: '#FAF7F2',
+                  },
+                },
+              }}
+            />
+          </CartProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

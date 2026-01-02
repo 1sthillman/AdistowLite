@@ -10,6 +10,9 @@ const withPWA = require("@ducanh2912/next-pwa").default({
   },
 });
 
+const createNextIntlPlugin = require('next-intl/plugin');
+const withNextIntl = createNextIntlPlugin();
+
 const isProd = process.env.NODE_ENV === 'production';
 
 /** @type {import('next').NextConfig} */
@@ -32,4 +35,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withPWA(nextConfig);
+module.exports = withPWA(withNextIntl(nextConfig));

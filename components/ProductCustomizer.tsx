@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Plus, Minus, Check } from 'lucide-react';
+import { X, Plus, Minus, Check, Search, Maximize2 } from 'lucide-react';
 import { MenuItem } from '@/types/menu';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/context/CartContext';
@@ -33,6 +33,7 @@ export default function ProductCustomizer({
         specialNotes: '',
     });
     const [totalPrice, setTotalPrice] = useState(0);
+    const [isImageExpanded, setIsImageExpanded] = useState(false);
 
     useEffect(() => {
         if (product) {
@@ -145,6 +146,23 @@ export default function ProductCustomizer({
                                 </button>
                             </div>
                         </div>
+
+                        {/* Product Image Section */}
+                        {product.image && (
+                            <div className="relative h-64 w-full overflow-hidden flex-shrink-0 group cursor-zoom-in" onClick={() => setIsImageExpanded(true)}>
+                                <motion.img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    layoutId={`product-image-${product.id}`}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent opacity-60"></div>
+                                <div className="absolute bottom-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 flex items-center gap-2">
+                                    <Search className="w-3 h-3 text-white/70" />
+                                    <span className="text-[10px] text-white/70 font-bold uppercase tracking-widest">Büyütmek İçin Dokun</span>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto px-6 py-6 custom-scroll bg-[#1A1A1A] relative">
@@ -287,6 +305,44 @@ export default function ProductCustomizer({
                     </motion.div>
                 </div>
             )}
+
+            {/* Fullscreen Image Preview */}
+            <AnimatePresence>
+                {isImageExpanded && product?.image && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-2xl"
+                        onClick={() => setIsImageExpanded(false)}
+                    >
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-white/20 rounded-full text-white backdrop-blur-md border border-white/20 z-10"
+                            onClick={() => setIsImageExpanded(false)}
+                        >
+                            <X className="w-6 h-6" />
+                        </motion.button>
+
+                        <motion.img
+                            initial={{ scale: 0.9, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.9, opacity: 0 }}
+                            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+                            src={product.image}
+                            alt={product.name}
+                            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+                            style={{ touchAction: 'none' }}
+                        />
+
+                        <div className="absolute bottom-10 left-0 right-0 text-center">
+                            <h3 className="text-white text-xl font-serif font-black mb-1">{product.name}</h3>
+                            <p className="text-white/50 text-sm font-light uppercase tracking-[0.3em]">Kapalı Çıkmak İçin Dokun</p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </AnimatePresence>
     );
 }

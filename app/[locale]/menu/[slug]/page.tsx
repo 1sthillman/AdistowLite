@@ -1,4 +1,5 @@
 import MenuPageClient from '@/components/MenuPageClient';
+import { unstable_setRequestLocale } from 'next-intl/server';
 
 export function generateStaticParams() {
   // Static Export requires all dynamic paths to be known at build time.
@@ -19,5 +20,6 @@ interface PageProps {
 }
 
 export default function Page({ params }: PageProps) {
+  unstable_setRequestLocale(params.locale);
   return <MenuPageClient params={params} />;
 }
