@@ -17,39 +17,38 @@ export default function HomePage({ params }: HomePageProps) {
   const [restaurantSlug, setRestaurantSlug] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1. Mount detection to prevent hydration errors
+  // 1. Mount detection
   useEffect(() => {
     setIsMounted(true);
-  }, []);
+    console.log('[Resolver] Localized Root Mounted. Params:', params);
+  }, [params]);
 
-  // 2. Recovery Logic (SILENT RESOLVER)
-  // This checks if we came from a 404 redirect.
+  // 2. Silent Resolver Logic
   const p = searchParams.get('p');
-  const isMenuPath = isMounted && p && (p.includes('/menu/') || p.split('/').filter(Boolean).length >= 2);
 
-  // If a menu path is detected, RENDER THE MENU IMMEDIATELY
+  // Decide if we should show the menu based on the 'p' parameter
+  const targetPath = p ? decodeURIComponent(p) : '';
+  const isMenuPath = isMounted && targetPath !== '' && (targetPath.includes('/menu/') || targetPath.split('/').filter(Boolean).length >= 1);
+
   if (isMenuPath) {
-    const parts = decodeURIComponent(p).split('/').filter(Boolean);
-    // Common structures: 
-    // [tr, menu, slug, table]
-    // [menu, slug, table]
-    // [slug, table] (bare)
+    const parts = targetPath.split('/').filter(Boolean);
+    // Remove locale if present at start
+    if (['tr', 'en'].includes(parts[0])) parts.shift();
 
     let slug = '';
     let tableId = '';
 
-    const menuIdx = parts.indexOf('menu');
-    if (menuIdx !== -1) {
-      slug = parts[menuIdx + 1];
-      tableId = parts[menuIndex + 2];
+    // Structure: [menu, slug, table] OR [slug, table]
+    if (parts[0] === 'menu') {
+      slug = parts[1];
+      tableId = parts[2];
     } else {
-      // Fallback: Assume [local?, slug, table?]
-      const startIdx = ['tr', 'en'].includes(parts[0]) ? 1 : 0;
-      slug = parts[startIdx];
-      tableId = parts[startIdx + 1];
+      slug = parts[0];
+      tableId = parts[1];
     }
 
     if (slug) {
+      console.log('[Resolver] Direct Menu Rendering:', { slug, tableId });
       return (
         <MenuPageClient
           params={{
@@ -66,7 +65,6 @@ export default function HomePage({ params }: HomePageProps) {
     e.preventDefault();
     if (restaurantSlug.trim()) {
       setIsLoading(true);
-      // Construct a path that will hit the resolver
       const target = `/menu/${restaurantSlug}/`;
       router.push(`/${params.locale}/?p=${encodeURIComponent(target)}`);
     }
@@ -77,7 +75,6 @@ export default function HomePage({ params }: HomePageProps) {
     router.push(`/${newLocale}`);
   };
 
-  // Pre-hydration state
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center">
@@ -86,7 +83,6 @@ export default function HomePage({ params }: HomePageProps) {
     );
   }
 
-  // DEFAULT HOME UI (Only shown if NOT a menu link)
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-center p-4">
       <div className="absolute top-4 right-4">
@@ -114,7 +110,7 @@ export default function HomePage({ params }: HomePageProps) {
           >
             <QrCode className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-3xl font-black text-white mb-2 tracking-tighter">RestQR</h1>
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tighter italic">RestQR</h1>
           <p className="text-gray-400">
             {params.locale === 'tr' ? 'Modern Menü Çözümü' : 'Modern Menu Solution'}
           </p>
