@@ -1,37 +1,31 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
+/**
+ * Root Redirector (app/page.tsx)
+ * 
+ * Ensures that any landing on the bare domain is sent to the default locale
+ * while preserving ALL parameters (p, q, etc.) and hashes.
+ */
 export default function RootPage() {
-  const hasRedirected = useRef(false);
-
   useEffect(() => {
-    if (hasRedirected.current) return;
+    if (typeof window === 'undefined') return;
 
-    const isProd = window.location.hostname !== 'localhost';
-    const repoName = isProd ? '/AdistowLite' : '';
-    const path = window.location.pathname.replace(/\/$/, '');
+    const l = window.location;
+    const search = l.search;
+    const hash = l.hash;
 
-    // If at the root (bare repo name or slash), go to default locale
-    if (path === '' || path === repoName || path === '/' || path === repoName + '/') {
-      hasRedirected.current = true;
+    // Redirect to default Turkish locale
+    const newUrl = l.origin + (l.pathname.endsWith('/') ? l.pathname : l.pathname + '/') + 'tr/' + search + hash;
 
-      const search = window.location.search || '';
-      const hash = window.location.hash || '';
-      const nextUrl = repoName + '/tr/' + search + hash;
-
-      console.log('[Root] Redirecting to localized entry:', nextUrl);
-      window.location.replace(nextUrl);
-    }
+    console.log('[Root] Redirecting to localized:', newUrl);
+    l.replace(newUrl);
   }, []);
 
   return (
-    <div style={{ background: '#0A0A0A', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontFamily: 'sans-serif' }}>
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ width: '30px', height: '30px', border: '2px solid rgba(16, 185, 129, 0.2)', borderTopColor: '#10b981', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 1rem' }}></div>
-        <p style={{ color: '#444', fontSize: '0.9rem' }}>RestQR...</p>
-        <style dangerouslySetInnerHTML={{ __html: '@keyframes spin { to { transform: rotate(360deg); } }' }} />
-      </div>
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center p-4">
+      <div className="w-10 h-10 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin"></div>
     </div>
   );
 }
