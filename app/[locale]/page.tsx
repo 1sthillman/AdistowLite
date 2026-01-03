@@ -17,49 +17,47 @@ export default function HomePage({ params }: HomePageProps) {
   const [restaurantSlug, setRestaurantSlug] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1. Mount detection
+  // State to handle the recovery and trigger re-render
+  const [recoveryData, setRecoveryData] = useState<{ slug: string; table: string } | null>(null);
+
   useEffect(() => {
     setIsMounted(true);
-    console.log('[Resolver] Localized Root Mounted. Params:', params);
-  }, [params]);
+  }, []);
 
-  // 2. Silent Resolver Logic
-  const p = searchParams.get('p');
+  // 1. Initial Detection (Run when searchParams are available)
+  useEffect(() => {
+    if (recoveryData) return; // Prevent loop
 
-  // Decide if we should show the menu based on the 'p' parameter
-  const targetPath = p ? decodeURIComponent(p) : '';
-  const isMenuPath = isMounted && targetPath !== '' && (targetPath.includes('/menu/') || targetPath.split('/').filter(Boolean).length >= 1);
+    const p = searchParams.get('p');
+    if (p) {
+      const decodedPath = decodeURIComponent(p);
+      const parts = decodedPath.split('/').filter(Boolean);
 
-  if (isMenuPath) {
-    const parts = targetPath.split('/').filter(Boolean);
-    // Remove locale if present at start
-    if (['tr', 'en'].includes(parts[0])) parts.shift();
+      // Normalize: remove locale and 'menu' markers to find the slug
+      const cleanParts = parts.filter(part => !['tr', 'en', 'menu'].includes(part));
 
-    let slug = '';
-    let tableId = '';
+      const slug = cleanParts[0];
+      const table = cleanParts[1] || '';
 
-    // Structure: [menu, slug, table] OR [slug, table]
-    if (parts[0] === 'menu') {
-      slug = parts[1];
-      tableId = parts[2];
-    } else {
-      slug = parts[0];
-      tableId = parts[1];
+      if (slug) {
+        console.log('[Resolver] Menu recovery match:', { slug, table });
+        setRecoveryData({ slug, table });
+
+        // CLEAN URL BAR SILENTLY
+        const isProd = window.location.hostname !== 'localhost';
+        const repoName = isProd ? '/AdistowLite' : '';
+        const targetDisplayPath = `/${params.locale}/menu/${slug}/${table ? table + '/' : ''}`;
+        const cleanUrl = window.location.origin + repoName + targetDisplayPath + window.location.hash;
+
+        window.history.replaceState(null, '', cleanUrl);
+      }
     }
+  }, [searchParams, params.locale, recoveryData]);
 
-    if (slug) {
-      console.log('[Resolver] Direct Menu Rendering:', { slug, tableId });
-      return (
-        <MenuPageClient
-          params={{
-            locale: params.locale,
-            slug: slug,
-            table: tableId
-          }}
-        />
-      );
-    }
-  }
+  const toggleLanguage = () => {
+    const newLocale = params.locale === 'tr' ? 'en' : 'tr';
+    router.push(`/${newLocale}`);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,11 +68,7 @@ export default function HomePage({ params }: HomePageProps) {
     }
   };
 
-  const toggleLanguage = () => {
-    const newLocale = params.locale === 'tr' ? 'en' : 'tr';
-    router.push(`/${newLocale}`);
-  };
-
+  // HYDRATION GUARD
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center">
@@ -83,55 +77,84 @@ export default function HomePage({ params }: HomePageProps) {
     );
   }
 
+  // 2. RENDER MENU IF RECOVERED
+  if (recoveryData) {
+    return (
+      <MenuPageClient
+        params={{
+          locale: params.locale,
+          slug: recoveryData.slug,
+          table: recoveryData.table
+        }}
+      />
+    );
+  }
+
+  // 3. DEFAULT HOME UI
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-center p-4">
-      <div className="absolute top-4 right-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-[#0A0A0A] to-black flex flex-col items-center justify-center p-4">
+      {/* Background Decor */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -right-[10%] w-[40%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full" />
+        <div className="absolute -bottom-[10%] -left-[10%] w-[40%] h-[40%] bg-emerald-500/5 blur-[120px] rounded-full" />
+      </div>
+
+      <div className="absolute top-6 right-6">
         <button
           onClick={toggleLanguage}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 hover:border-emerald-500/50 transition-all"
+          className="group flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-white/10 transition-all backdrop-blur-md"
         >
-          <Globe className="w-4 h-4 text-emerald-500" />
-          <span className="text-sm font-medium text-white">
+          <Globe className="w-4 h-4 text-emerald-500 group-hover:rotate-12 transition-transform" />
+          <span className="text-sm font-bold text-white/90">
             {params.locale === 'tr' ? 'EN' : 'TR'}
           </span>
         </button>
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md relative z-10"
       >
-        <div className="text-center mb-8">
+        <div className="text-center mb-10">
           <motion.div
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-emerald-500 rounded-3xl mb-4 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center justify-center w-24 h-24 bg-emerald-500 rounded-[2rem] mb-6 shadow-[0_0_50px_rgba(16,185,129,0.4)]"
           >
-            <QrCode className="w-10 h-10 text-white" />
+            <QrCode className="w-12 h-12 text-white" />
           </motion.div>
-          <h1 className="text-3xl font-bold text-white mb-2 tracking-tighter italic">RestQR</h1>
-          <p className="text-gray-400">
+          <h1 className="text-4xl font-black text-white mb-3 tracking-tighter italic">RestQR</h1>
+          <p className="text-gray-400 font-medium">
             {params.locale === 'tr' ? 'Modern Menü Çözümü' : 'Modern Menu Solution'}
           </p>
         </div>
 
-        <div className="bg-gray-800/50 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/5 shadow-2xl">
-          <h2 className="text-xl font-bold text-white mb-6 text-center">
-            {params.locale === 'tr' ? 'QR Kodu Tarayın' : 'Scan QR Code'}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white/[0.03] backdrop-blur-2xl rounded-[3rem] p-10 border border-white/10 shadow-2xl relative overflow-hidden group"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+          <h2 className="text-xl font-black text-white mb-8 text-center uppercase tracking-widest text-emerald-500">
+            {params.locale === 'tr' ? 'Menüyü Görüntüle' : 'View Menu'}
           </h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-black text-emerald-500 uppercase tracking-widest mb-2 ml-1">
+          <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+            <div className="space-y-2">
+              <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">
                 {params.locale === 'tr' ? 'Restoran Kodu' : 'Restaurant Code'}
               </label>
               <input
                 type="text"
                 value={restaurantSlug}
                 onChange={(e) => setRestaurantSlug(e.target.value)}
-                placeholder={params.locale === 'tr' ? 'örn: burger-shop' : 'e.g. burger-shop'}
-                className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-white placeholder:text-gray-600 outline-none transition-all"
+                placeholder={params.locale === 'tr' ? 'örn: demo-restaurant' : 'e.g. demo-restaurant'}
+                className="w-full px-8 py-5 bg-black/50 border border-white/5 rounded-3xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-white placeholder:text-white/20 outline-none transition-all font-bold text-lg"
                 required
               />
             </div>
@@ -139,23 +162,30 @@ export default function HomePage({ params }: HomePageProps) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_20px_rgba(16,185,129,0.2)] active:scale-[0.98] disabled:opacity-50"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 px-8 rounded-3xl flex items-center justify-center gap-4 transition-all shadow-[0_20px_40px_rgba(16,185,129,0.25)] active:scale-[0.97] disabled:opacity-50"
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 <>
-                  <span>{params.locale === 'tr' ? 'MENÜYÜ GÖSTER' : 'VIEW MENU'}</span>
+                  <span className="tracking-tighter">{params.locale === 'tr' ? 'DEVAM ET' : 'CONTINUE'}</span>
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}
             </button>
           </form>
-        </div>
+        </motion.div>
 
-        <div className="mt-8 text-center text-gray-500 text-xs font-medium">
-          Powered by <span className="text-emerald-500">RestQR Platform</span>
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-10 text-center"
+        >
+          <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">
+            RestQR Digital Solutions
+          </span>
+        </motion.div>
       </motion.div>
     </div>
   );
