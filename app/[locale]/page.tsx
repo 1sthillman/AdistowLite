@@ -10,21 +10,27 @@ interface HomePageProps {
   params: { locale: string };
 }
 
+declare global {
+  interface Window {
+    __RESTQR_RECOVERY?: boolean;
+  }
+}
+
 export default function HomePage({ params }: HomePageProps) {
   const router = useRouter();
 
   // 1. ATOMIC DETECTION (Directly from window.location)
-  // We use useMemo to have this answer IMMEDIATELY upon execution
   const recoveryInfo = useMemo(() => {
     if (typeof window === 'undefined') return { type: 'loading', data: null };
 
-    // Check if '?p=' is present in the ACTUAL search string
     const search = window.location.search;
     const urlParams = new URLSearchParams(search);
     const p = urlParams.get('p');
 
-    if (p) {
-      let target = decodeURIComponent(p);
+    const isGlobalRecovery = window.__RESTQR_RECOVERY === true;
+
+    if (p || isGlobalRecovery) {
+      let target = decodeURIComponent(p || '');
       if (target.includes('%')) target = decodeURIComponent(target);
 
       const parts = target.split('/').filter(Boolean);
@@ -44,17 +50,17 @@ export default function HomePage({ params }: HomePageProps) {
   const [restaurantSlug, setRestaurantSlug] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Check for the "invalid placeholder" API key from your screenshot
+  // Check for the "invalid placeholder" API key from screenshot
   const isKeyInvalid = useMemo(() => {
     if (typeof window === 'undefined') return false;
     const key = process.env.NEXT_PUBLIC_FIREBASE_API_KEY || '';
-    return key.includes('-mPq-') || key.includes('p-l-0X');
+    // Screenshot showed: AIzaSyB-mPq-8Xy7X_p-l-0X-y-X-p-l-0X-
+    return key.includes('-mPq-') || key.includes('p-l-0X-') || key === '';
   }, []);
 
   useEffect(() => {
     setIsMounted(true);
 
-    // SILENT URL CLEANUP (Only if we are in recovery mode)
     if (recoveryInfo.type === 'recovery' && recoveryInfo.data) {
       const isProd = window.location.hostname !== 'localhost';
       const repoName = isProd ? '/AdistowLite' : '';
@@ -104,80 +110,58 @@ export default function HomePage({ params }: HomePageProps) {
     );
   }
 
-  // C. NORMAL HOME UI
+  // C. NORMAL HOME UI (Only if NOT loading and NOT recovery)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-[#0A0A0A] to-black flex flex-col items-center justify-center p-4">
-
+    <div className="min-h-screen bg-[#0A0A0A] flex flex-col">
       {/* Configuration Error Alert */}
       {isKeyInvalid && (
-        <div className="absolute top-0 left-0 right-0 bg-red-500/90 text-white p-4 text-center z-50 flex items-center justify-center gap-3 backdrop-blur-md">
+        <div className="bg-red-500 text-white p-4 text-center z-[100] flex items-center justify-center gap-3 font-bold border-b border-white/20">
           <AlertTriangle className="w-5 h-5 flex-shrink-0" />
-          <p className="text-sm font-bold">
-            DİKKAT: Firebase API Anahtarı eksik veya hatalı! Menüler yüklenemeyecektir.
-          </p>
+          <span>UYARI: Firebase API Anahtarı Hatalı! (Placeholder Key Tespit Edildi)</span>
         </div>
       )}
 
-      <div className="absolute top-6 right-6">
-        <button
-          onClick={toggleLanguage}
-          className="group flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/5 border border-white/10 hover:border-emerald-500/50 hover:bg-white/10 transition-all backdrop-blur-md text-white font-bold"
-        >
-          <Globe className="w-4 h-4 text-emerald-500" />
-          {params.locale === 'tr' ? 'EN' : 'TR'}
-        </button>
-      </div>
+      <div className="flex-1 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        {/* BG Decor */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md relative z-10"
-      >
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-emerald-500 rounded-[2.5rem] mb-6 shadow-[0_0_50px_rgba(16,185,129,0.4)]">
-            <QrCode className="w-12 h-12 text-white" />
+        <div className="absolute top-6 right-6">
+          <button onClick={toggleLanguage} className="bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl text-white font-bold flex items-center gap-2 border border-white/10 transition-all">
+            <Globe className="w-4 h-4 text-emerald-500" />
+            {params.locale === 'tr' ? 'TUR' : 'ENG'}
+          </button>
+        </div>
+
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-sm text-center relative z-10">
+          <div className="w-20 h-20 bg-emerald-500 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-emerald-500/20 rotate-3 animate-pulse">
+            <QrCode className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-black text-white mb-3 tracking-tighter">RestQR</h1>
-          <p className="text-gray-400 font-medium">Modern QR Menü Çözümü</p>
-        </div>
+          <h1 className="text-4xl font-black text-white mb-2 italic">RestQR</h1>
+          <p className="text-white/40 font-medium mb-12">Dijital Menü Çözümleri</p>
 
-        <div className="bg-white/[0.03] backdrop-blur-2xl rounded-[3rem] p-10 border border-white/10 shadow-2xl">
-          <h2 className="text-xl font-bold text-emerald-500 mb-8 text-center uppercase tracking-widest italic">
-            {params.locale === 'tr' ? 'Menüye Giriş' : 'Menu Entrance'}
-          </h2>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-2">
-                Restoran Kodu
-              </label>
-              <input
-                type="text"
-                value={restaurantSlug}
-                onChange={(e) => setRestaurantSlug(e.target.value)}
-                placeholder="örn: demo-restaurant"
-                className="w-full px-8 py-5 bg-black/50 border border-white/5 rounded-3xl focus:ring-2 focus:ring-emerald-500 text-white outline-none font-bold text-lg"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-5 px-8 rounded-3xl flex items-center justify-center gap-4 shadow-xl active:scale-[0.98] transition-all"
-            >
-              {isLoading ? (
-                <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-              ) : (
-                <>
-                  <span>GÖRÜNTÜLE</span>
-                  <ArrowRight className="w-5 h-5" />
-                </>
-              )}
-            </button>
-          </form>
-        </div>
-      </motion.div>
+          <div className="bg-white/[0.04] backdrop-blur-3xl rounded-[2.5rem] p-8 border border-white/10 shadow-2xl">
+            <h2 className="text-xl font-black text-white mb-8 tracking-widest text-emerald-500">MİSAFİR GİRİŞİ</h2>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="text-left space-y-2">
+                <label className="text-[10px] font-bold text-white/30 uppercase tracking-widest ml-2">Restoran Adı</label>
+                <input
+                  type="text"
+                  value={restaurantSlug}
+                  onChange={(e) => setRestaurantSlug(e.target.value)}
+                  placeholder="örn: demo-rest"
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-white focus:border-emerald-500 outline-none transition-all placeholder:text-white/10"
+                  required
+                />
+              </div>
+              <button type="submit" className="w-full bg-emerald-500 hover:bg-emerald-400 text-white font-black py-4 rounded-2xl flex items-center justify-center gap-3 shadow-lg transition-all active:scale-95">
+                <span>{isLoading ? 'BEKLEYİN...' : 'MENÜYE GİR'}</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </form>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }

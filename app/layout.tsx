@@ -24,6 +24,7 @@ export default function RootLayout({
                     (function() {
                         var l = window.location;
                         if (l.search.indexOf('p=%2F') !== -1) {
+                            window.__RESTQR_RECOVERY = true;
                             console.log('[SPA] Recovery mode active.');
                         }
                     })();
