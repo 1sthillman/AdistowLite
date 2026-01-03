@@ -17,28 +17,44 @@ export default function HomePage({ params }: HomePageProps) {
   const [restaurantSlug, setRestaurantSlug] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // 1. Ensure hydration match by waiting for mount
+  // 1. Mount detection to prevent hydration errors
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // --- In-line Menu Recovery ---
+  // 2. Recovery Logic (SILENT RESOLVER)
+  // This checks if we came from a 404 redirect.
   const p = searchParams.get('p');
-  const isMenuPath = p && p.includes('/menu/');
+  const isMenuPath = isMounted && p && (p.includes('/menu/') || p.split('/').filter(Boolean).length >= 2);
 
-  // If we are on a recovery path and mounted, render the Menu
-  if (isMounted && isMenuPath) {
-    const parts = p.split('/').filter(Boolean);
-    const menuIndex = parts.indexOf('menu');
-    if (menuIndex !== -1) {
-      const slug = parts[menuIndex + 1];
-      const tableId = parts[menuIndex + 2];
+  // If a menu path is detected, RENDER THE MENU IMMEDIATELY
+  if (isMenuPath) {
+    const parts = decodeURIComponent(p).split('/').filter(Boolean);
+    // Common structures: 
+    // [tr, menu, slug, table]
+    // [menu, slug, table]
+    // [slug, table] (bare)
 
+    let slug = '';
+    let tableId = '';
+
+    const menuIdx = parts.indexOf('menu');
+    if (menuIdx !== -1) {
+      slug = parts[menuIdx + 1];
+      tableId = parts[menuIndex + 2];
+    } else {
+      // Fallback: Assume [local?, slug, table?]
+      const startIdx = ['tr', 'en'].includes(parts[0]) ? 1 : 0;
+      slug = parts[startIdx];
+      tableId = parts[startIdx + 1];
+    }
+
+    if (slug) {
       return (
         <MenuPageClient
           params={{
             locale: params.locale,
-            slug: slug || 'demo',
+            slug: slug,
             table: tableId
           }}
         />
@@ -50,8 +66,9 @@ export default function HomePage({ params }: HomePageProps) {
     e.preventDefault();
     if (restaurantSlug.trim()) {
       setIsLoading(true);
-      // We use a query param approach for consistency in dev
-      router.push(`/${params.locale}/?p=${encodeURIComponent('/menu/' + restaurantSlug + '/')}`);
+      // Construct a path that will hit the resolver
+      const target = `/menu/${restaurantSlug}/`;
+      router.push(`/${params.locale}/?p=${encodeURIComponent(target)}`);
     }
   };
 
@@ -60,7 +77,7 @@ export default function HomePage({ params }: HomePageProps) {
     router.push(`/${newLocale}`);
   };
 
-  // If not mounted yet, render a skeleton/empty to match server
+  // Pre-hydration state
   if (!isMounted) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex flex-col items-center justify-center">
@@ -69,15 +86,16 @@ export default function HomePage({ params }: HomePageProps) {
     );
   }
 
+  // DEFAULT HOME UI (Only shown if NOT a menu link)
   return (
-    <div className="min-h-screen bg-gradient-to-br from-restqr-emerald-50 to-restqr-gold-50 dark:from-gray-900 dark:to-gray-800 flex flex-col items-center justify-center p-4 text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex flex-col items-center justify-center p-4">
       <div className="absolute top-4 right-4">
         <button
           onClick={toggleLanguage}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-gray-800 shadow-md hover:shadow-lg transition-shadow"
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 hover:border-emerald-500/50 transition-all"
         >
-          <Globe className="w-4 h-4" />
-          <span className="text-sm font-medium">
+          <Globe className="w-4 h-4 text-emerald-500" />
+          <span className="text-sm font-medium text-white">
             {params.locale === 'tr' ? 'EN' : 'TR'}
           </span>
         </button>
@@ -86,66 +104,62 @@ export default function HomePage({ params }: HomePageProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0.8 }}
             animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring" }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-restqr-emerald-500 rounded-2xl mb-4 shadow-lg"
+            className="inline-flex items-center justify-center w-20 h-20 bg-emerald-500 rounded-3xl mb-4 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
           >
             <QrCode className="w-10 h-10 text-white" />
           </motion.div>
-          <h1 className="text-3xl font-bold mb-2">RestQR</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {params.locale === 'tr' ? 'Modern QR Menü Sistemi' : 'Modern QR Menu System'}
+          <h1 className="text-3xl font-black text-white mb-2 tracking-tighter">RestQR</h1>
+          <p className="text-gray-400">
+            {params.locale === 'tr' ? 'Modern Menü Çözümü' : 'Modern Menu Solution'}
           </p>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="bg-white dark:bg-gray-900/50 rounded-2xl shadow-xl p-6 border border-gray-100 dark:border-gray-800"
-        >
-          <h2 className="text-xl font-semibold mb-4 text-center">
+        <div className="bg-gray-800/50 backdrop-blur-xl rounded-[2.5rem] p-8 border border-white/5 shadow-2xl">
+          <h2 className="text-xl font-bold text-white mb-6 text-center">
             {params.locale === 'tr' ? 'QR Kodu Tarayın' : 'Scan QR Code'}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-400 mb-2">
+              <label className="block text-xs font-black text-emerald-500 uppercase tracking-widest mb-2 ml-1">
                 {params.locale === 'tr' ? 'Restoran Kodu' : 'Restaurant Code'}
               </label>
               <input
                 type="text"
                 value={restaurantSlug}
                 onChange={(e) => setRestaurantSlug(e.target.value)}
-                placeholder={params.locale === 'tr' ? 'örn: demo-restoran' : 'e.g. demo-restaurant'}
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-restqr-emerald-500 focus:border-transparent bg-white dark:bg-gray-800"
+                placeholder={params.locale === 'tr' ? 'örn: burger-shop' : 'e.g. burger-shop'}
+                className="w-full px-6 py-4 bg-black/40 border border-white/10 rounded-2xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-white placeholder:text-gray-600 outline-none transition-all"
                 required
               />
             </div>
-            <motion.button
+
+            <button
               type="submit"
               disabled={isLoading}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full bg-restqr-emerald-500 hover:bg-restqr-emerald-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:opacity-50"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-4 px-6 rounded-2xl flex items-center justify-center gap-3 transition-all shadow-[0_10px_20px_rgba(16,185,129,0.2)] active:scale-[0.98] disabled:opacity-50"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
                 <>
-                  <span>{params.locale === 'tr' ? 'Menüyü Görüntüle' : 'View Menu'}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>{params.locale === 'tr' ? 'MENÜYÜ GÖSTER' : 'VIEW MENU'}</span>
+                  <ArrowRight className="w-5 h-5" />
                 </>
               )}
-            </motion.button>
+            </button>
           </form>
-        </motion.div>
+        </div>
+
+        <div className="mt-8 text-center text-gray-500 text-xs font-medium">
+          Powered by <span className="text-emerald-500">RestQR Platform</span>
+        </div>
       </motion.div>
     </div>
   );
