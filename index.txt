@@ -1,12 +1,10 @@
-1:HL["/AdistowLite/_next/static/css/b377fa116e56c624.css","style",{"crossOrigin":""}]
-0:["j_qP9OPVJQyAnjZNtf3u-",[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],"$L2",[[["$","link","0",{"rel":"stylesheet","href":"/AdistowLite/_next/static/css/b377fa116e56c624.css","precedence":"next","crossOrigin":""}]],"$L3"]]]]
-4:"$Sreact.suspense"
-5:I[752,["185","static/chunks/app/layout-8b073443330cb548.js"],""]
-6:I[6954,[],""]
-7:I[7264,[],""]
-8:I[8516,["160","static/chunks/app/not-found-7f4f22ad1502ebc9.js"],""]
-a:I[8297,[],""]
-b:I[3356,["931","static/chunks/app/page-5cee276476b14725.js"],""]
-2:[null,["$","html",null,{"lang":"tr","suppressHydrationWarning":true,"children":[["$","head",null,{"children":["$","script",null,{"dangerouslySetInnerHTML":{"__html":"\n                    (function() {\n                        var l = window.location;\n                        if (l.search.indexOf('p=%2F') !== -1) {\n                            console.log('[SPA] Recovery mode active.');\n                        }\n                    })();\n                "}}]}],["$","body",null,{"className":"--font-inter --font-playfair --font-mono font-sans bg-[#0A0A0A] text-[#FAF7F2] antialiased selection:bg-[#D97706]/30 selection:text-white overflow-x-hidden","children":[["$","$4",null,{"fallback":null,"children":["$","$L5",null,{}]}],["$","$L6",null,{"parallelRouterKey":"children","segmentPath":["children"],"loading":"$undefined","loadingStyles":"$undefined","loadingScripts":"$undefined","hasLoading":false,"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L7",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":["$","$L8",null,{}],"notFoundStyles":[],"childProp":{"current":["$L9",["$","$La",null,{"propsForComponent":{"params":{}},"Component":"$b","isStaticGeneration":true}],null],"segment":"__PAGE__"},"styles":null}]]}]]}],null]
+1:HL["/AdistowLite/_next/static/css/1c74601b620988bc.css","style",{"crossOrigin":""}]
+0:["c6Hl45o2IlsDH76Q5br_f",[[["",{"children":["__PAGE__",{}]},"$undefined","$undefined",true],"$L2",[[["$","link","0",{"rel":"stylesheet","href":"/AdistowLite/_next/static/css/1c74601b620988bc.css","precedence":"next","crossOrigin":""}]],"$L3"]]]]
+4:I[6954,[],""]
+5:I[7264,[],""]
+6:I[8516,["160","static/chunks/app/not-found-1d4d6178577acaba.js"],""]
+8:I[8297,[],""]
+9:I[3356,["931","static/chunks/app/page-5cee276476b14725.js"],""]
+2:[null,["$","html",null,{"lang":"tr","suppressHydrationWarning":true,"children":[["$","head",null,{"children":["$","script",null,{"dangerouslySetInnerHTML":{"__html":"\n                    (function() {\n                        var l = window.location;\n                        if (l.search.indexOf('p=%2F') !== -1) {\n                            console.log('[SPA] Recovery mode active.');\n                        }\n                    })();\n                "}}]}],["$","body",null,{"className":"--font-inter --font-playfair --font-mono font-sans bg-[#0A0A0A] text-[#FAF7F2] antialiased selection:bg-[#D97706]/30 selection:text-white overflow-x-hidden","children":["$","$L4",null,{"parallelRouterKey":"children","segmentPath":["children"],"loading":"$undefined","loadingStyles":"$undefined","loadingScripts":"$undefined","hasLoading":false,"error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L5",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":["$","$L6",null,{}],"notFoundStyles":[],"childProp":{"current":["$L7",["$","$L8",null,{"propsForComponent":{"params":{}},"Component":"$9","isStaticGeneration":true}],null],"segment":"__PAGE__"},"styles":null}]}]]}],null]
 3:[["$","meta","0",{"name":"viewport","content":"width=device-width, initial-scale=1"}],["$","meta","1",{"charSet":"utf-8"}]]
-9:null
+7:null
